@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#102d38">
 <meta name="description" content="Smart Família: orçamento da casa, metas de equilíbrio financeiro e lazer protegido.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>Smart Família — No Positivo</title>
 <style>
 :root{--navy:#102d38;--navy2:#1b3b47;--teal:#0a8b7f;--teal2:#dff5ec;--cream:#f6f7f4;--paper:#fff;--ink:#182b33;--muted:#60737b;--border:#e3e9e6;--amber:#bc7527;--amberbg:#fff4de;--red:#b5474a;--redbg:#fff0ee;--peach:#f9d6be;--shadow:0 12px 32px rgba(16,45,56,.055)}
@@ -284,6 +286,13 @@ document.getElementById('view').addEventListener('submit',e=>{e.preventDefault()
 document.getElementById('importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>5e6)throw Error('O arquivo excede o tamanho permitido de 5 MB.');const raw=JSON.parse(await f.text());const imported=normalize(raw);if(!confirm(`Restaurar backup? Isso substituirá todos os lançamentos e metas deste dispositivo por ${imported.transactions.length} lançamento(s) do arquivo.`))return;const previous=data;data=imported;if(!save(true)){data=previous;throw Error('Backup válido, mas o navegador não conseguiu gravar os dados. O arquivo anterior permanece no armazenamento.');}loadProblemMessage='';scenarioCut=0;scenarioExtra=0;editingId=null;render();toast('Backup restaurado com sucesso.')}catch(err){alert('Não foi possível restaurar: '+err.message)}finally{e.target.value=''}});
 render();if(memoryOnly)setTimeout(()=>toast('Salvamento local indisponível. Use backup JSON para guardar seus dados.'),900);
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
