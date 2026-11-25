@@ -1,0 +1,25 @@
+{
+  "name": "Smart Família — No Positivo",
+  "short_name": "Smart Família",
+  "description": "Controle de receitas, despesas, orçamento, lazer em família e plano de equilíbrio financeiro.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f4",
+  "theme_color": "#102d38",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
