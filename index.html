@@ -35,7 +35,7 @@ form{margin:0}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr
     <nav class="tabs" id="tabs" aria-label="Seções do aplicativo"><button class="tab active" data-tab="inicio">Visão geral</button><button class="tab" data-tab="lancamentos">Entradas e saídas</button><button class="tab" data-tab="orcamentos">Orçamentos</button><button class="tab" data-tab="fluxo">Fluxo diário</button><button class="tab" data-tab="plano">Plano de solução</button><button class="tab" data-tab="ajustes">Configurações</button></nav>
   </div>
 </header>
-<main class="wrap"><div id="view"></div><p class="footnote">Smart Família RC2.1 CANDIDATA • Dados apenas no dispositivo • Sem sincronização entre aparelhos • Use backup JSON</p></main>
+<main class="wrap"><div id="view"></div><p class="footnote">Smart Família RC2.2 CANDIDATA • Dados apenas no dispositivo • Sem sincronização entre aparelhos • Use backup JSON</p></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="importFile" accept=".json,application/json" hidden>
 <script>
@@ -122,7 +122,7 @@ function cashFlowView(s){const f=calendarModel(),movements=f.rows.filter(r=>r.it
  const pending=(t)=>`<div class="pending-item"><div><b>${esc(t.title)}</b><small>${dateDisplay(t.date)} · ${esc(t.category)} · ${t.type==='income'?'Entrada':'Saída'}</small></div><strong class="${t.type==='income'?'positive':'negative'}">${money(t.amount)}</strong></div>`;
  return `<div class="grid split"><section class="card pad"><div class="sectionhead"><div><h2>Fluxo de caixa por data</h2><p>Saldo inicial + lançamentos nas datas informadas, inclusive os previstos.</p></div></div>${risks}<div class="statstrip"><div><label>Saldo inicial</label><strong>${fmtSigned(s.cfg.opening)}</strong></div><div><label>Menor saldo projetado</label><strong class="${f.low<0?'negative':'positive'}">${fmtSigned(f.low)}</strong></div><div><label>Entradas ainda não confirmadas</label><strong>${money(f.unconfirmedIncome)}</strong></div></div><div class="notice mt18">O saldo de cada dia é uma projeção, não extrato bancário. Registre as contas e datas corretamente; receitas futuras não são dinheiro disponível antes de acontecerem.</div></section>
  <section class="card pad"><div class="sectionhead"><div><h2>Contas e recebimentos pendentes</h2><p>Vencidas e próximos sete dias, no mês selecionado.</p></div></div><h3 style="font-size:13px">Despesas vencidas não confirmadas (${f.overdue.length})</h3><div class="pending-list">${f.overdue.length?f.overdue.slice(0,7).map(pending).join(''):'<div class="notice">Nenhuma despesa vencida pendente cadastrada.</div>'}</div><h3 style="font-size:13px;margin-top:24px">Movimentações dos próximos 7 dias (${f.coming.length})</h3><div class="pending-list">${f.coming.length?f.coming.slice(0,8).map(pending).join(''):'<div class="notice">Nenhuma movimentação pendente para este período.</div>'}</div>${(f.overdue.length>7||f.coming.length>8)?'<p class="caption mt18">Mostrando apenas os primeiros itens de cada grupo. Consulte Entradas e saídas para ver todos.</p>':''}<button class="cta outline mt18" data-action="to-transactions">Atualizar lançamentos</button></section></div>
- <section class="card pad mt18"><div class="sectionhead"><div><h2>Linha do tempo financeira</h2><p>Dias com movimentações e saldo acumulado depois de cada dia.</p></div><button class="cta outline small" id="exportCsv">Exportar CSV</button></div>${movements.length?`<div class="tablewrap"><table class="cash-table"><thead><tr><th>Data</th><th>Entradas</th><th>Saídas</th><th>Saldo do dia</th></tr></thead><tbody>${movements.map(r=>`<tr class="${r.balance<0?'risk':r.day===today()?'today':''}"><td>${dateDisplay(r.day)}<small style="display:block;color:var(--muted)">${r.items.length} lançamento(s)</small></td><td>${money(r.income)}</td><td>${money(r.expense)}</td><td class="${r.balance<0?'negative':'positive'}"><b>${fmtSigned(r.balance)}</b></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty"><b>Não há lançamentos neste mês</b>Registre entradas e saídas para visualizar o fluxo.</div>'}</section>`;
+ <section class="card pad mt18"><div class="sectionhead"><div><h2>Linha do tempo financeira</h2><p>Dias com movimentações e saldo acumulado depois de cada dia.</p></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="cta outline small" id="exportCsv">Exportar CSV</button><button class="cta outline small" id="exportPdf">Exportar PDF</button></div></div>${movements.length?`<div class="tablewrap"><table class="cash-table"><thead><tr><th>Data</th><th>Entradas</th><th>Saídas</th><th>Saldo do dia</th></tr></thead><tbody>${movements.map(r=>`<tr class="${r.balance<0?'risk':r.day===today()?'today':''}"><td>${dateDisplay(r.day)}<small style="display:block;color:var(--muted)">${r.items.length} lançamento(s)</small></td><td>${money(r.income)}</td><td>${money(r.expense)}</td><td class="${r.balance<0?'negative':'positive'}"><b>${fmtSigned(r.balance)}</b></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty"><b>Não há lançamentos neste mês</b>Registre entradas e saídas para visualizar o fluxo.</div>'}</section>`;
 }
 function budgetsView(s){const conf=s.cfg,budgeted=expenseCategories.reduce((a,c)=>a+conf.budgets[c],0);return `<section class="card pad"><div class="sectionhead"><div><h2>Limites de despesas por categoria</h2><p>Defina um teto mensal e compare com as despesas registradas (realizadas + previstas).</p></div><button class="cta secondary small" data-action="to-transactions">Adicionar despesa</button></div><div class="alert neutral">${alertIcon}<div><strong>Limites não são despesas lançadas</strong><p>Para projetar o saldo corretamente, cadastre suas contas previstas em “Entradas e saídas”. A definição de um limite, por si só, não reduz o saldo.</p></div></div>
 <div class="statstrip"><div><label>Limites definidos</label><strong>${money(budgeted)}</strong></div><div><label>Despesas lançadas</label><strong>${money(s.expense)}</strong></div><div><label>Categorias acima do limite</label><strong>${expenseCategories.filter(c=>conf.budgets[c]>0&&s.tx.filter(t=>t.type==='expense'&&t.category===c).reduce((a,t)=>a+t.amount,0)>conf.budgets[c]).length}</strong></div></div>
@@ -140,6 +140,124 @@ function downloadFile(content,name,mime){const blob=new Blob([content],{type:mim
 function exportCsv(){const s=sums(),lines=[['Smart Família RC2 - movimentações do mês',selectedMonth],['Saldo inicial',s.cfg.opening],['Entradas projetadas',s.income],['Saídas projetadas',s.expense],['Lazer ainda a reservar',s.leisurePending],['Reserva ainda a separar',s.savingsPending],['Margem final livre',s.free],[],['Data','Tipo','Descrição','Categoria','Valor (R$)','Situação','Fixo']];
  for(const t of [...s.tx].sort((a,b)=>a.date.localeCompare(b.date)))lines.push([t.date,t.type==='income'?'Entrada':'Saída',t.title,t.category,t.amount.toFixed(2).replace('.',','),t.status==='done'?'Realizado':'Previsto',t.fixed?'Sim':'Não']);
  const csv='\ufeff'+lines.map(row=>row.map(csvEscape).join(';')).join('\r\n');downloadFile(csv,`Smart_Familia_movimentacoes_${selectedMonth}.csv`,'text/csv;charset=utf-8');toast('Relatório CSV gerado para o mês selecionado.');}
+
+// PDF A4 gerado localmente. Mantém CSV e backup JSON inalterados.
+function pdfEncode(text){
+ const extras={'\u20ac':128,'\u201a':130,'\u0192':131,'\u201e':132,'\u2026':133,'\u2020':134,'\u2021':135,'\u02c6':136,'\u2030':137,'\u0160':138,'\u2039':139,'\u0152':140,'\u017d':142,'\u2018':145,'\u2019':146,'\u201c':147,'\u201d':148,'\u2022':149,'\u2013':150,'\u2014':151,'\u02dc':152,'\u2122':153,'\u0161':154,'\u203a':155,'\u0153':156,'\u017e':158,'\u0178':159};
+ let out='';for(const char of String(text==null?'':text)){
+  const cp=char.codePointAt(0),byte=(cp>=32&&cp<=126)||(cp>=160&&cp<=255)?cp:(extras[char]||63);
+  out+=byte.toString(16).padStart(2,'0');
+ }return out.toUpperCase();
+}
+function pdfApproxWidth(value,size){
+ // Limite conservador para manter cada campo dentro de sua coluna.
+ return Array.from(String(value)).reduce((sum,ch)=>sum+(/[MW@%]/.test(ch)?0.84:/[iIl1.,:;! ]/.test(ch)?0.30:0.56),0)*size;
+}
+function pdfFit(value,maxWidth,fontSize){
+ let str=String(value==null?'':value).replace(/[\r\n\t]/g,' ').trim();
+ if(pdfApproxWidth(str,fontSize)<=maxWidth)return str;
+ while(str.length>0&&pdfApproxWidth(str+'...',fontSize)>maxWidth)str=str.slice(0,-1);
+ return str+'...';
+}
+function pdfWrap(value,maxWidth,fontSize){
+ const clean=String(value==null?'':value).replace(/[\r\n\t]/g,' ').trim();
+ if(!clean)return [''];
+ const result=[];let line='';
+ for(const token of clean.split(/\s+/)){
+  const trial=line?line+' '+token:token;
+  if(pdfApproxWidth(trial,fontSize)<=maxWidth){line=trial;continue;}
+  if(line){result.push(line);line='';}
+  // Divida palavras excepcionalmente longas sem perder caracteres.
+  let part='';for(const char of token){
+   if(part&&pdfApproxWidth(part+char,fontSize)>maxWidth){result.push(part);part='';}
+   part+=char;
+  }
+  line=part;
+ }
+ if(line)result.push(line);
+ return result.length?result:[''];
+}
+function makePdfReport(){
+ const A4_W=595.28,A4_H=841.89,margin=43,right=A4_W-margin;
+ const contentW=right-margin, pages=[];let ops=[],y=0;
+ const colors={navy:[0.063,0.176,0.22],teal:[0.04,0.545,0.498],red:[0.72,0.22,0.25],text:[0.10,0.17,0.20],muted:[0.36,0.44,0.47],line:[0.87,0.91,0.89],paper:[0.96,0.98,0.97],white:[1,1,1]};
+ const rgb=(c,op)=>`${c.map(n=>n.toFixed(3)).join(' ')} ${op}`;
+ const rectangle=(x,top,w,h,color)=>{ops.push(rgb(color,'rg'),`${x.toFixed(2)} ${(A4_H-top-h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`)};
+ const line=(top,x1,x2,color=colors.line)=>{ops.push(rgb(color,'RG'),`0.5 w ${x1.toFixed(2)} ${(A4_H-top).toFixed(2)} m ${x2.toFixed(2)} ${(A4_H-top).toFixed(2)} l S`)};
+ const txt=(value,x,top,size=9,bold=false,color=colors.text)=>{ops.push(rgb(color,'rg'),`BT /${bold?'F2':'F1'} ${size} Tf 1 0 0 1 ${x.toFixed(2)} ${(A4_H-top).toFixed(2)} Tm <${pdfEncode(value)}> Tj ET`)};
+ const rightText=(value,rightX,top,size=9,bold=false,color=colors.text)=>{const width=pdfApproxWidth(value,size);txt(value,rightX-width,top,size,bold,color)};
+ const newPage=()=>{if(ops.length)pages.push(ops.join('\n'));ops=[];rectangle(0,0,A4_W,67,colors.navy);txt('SMART FAMÍLIA',margin,33,17,true,colors.white);txt('Relatório financeiro mensal  |  '+selectedMonth,margin,51,9,false,colors.white);y=91};
+ const ensure=(height)=>{if(y+height>758){newPage();return true}return false};
+ const title=(text)=>{ensure(39);txt(text,margin,y,12,true,colors.navy);y+=20;line(y,margin,right);y+=11};
+ const keyval=(label,value)=>{ensure(22);txt(label,margin+4,y,9,false,colors.muted);rightText(value,right-4,y,9,true);y+=23};
+ const footer=()=>{for(let p=0;p<pages.length;p++){const footerOps=[rgb(colors.muted,'rg'),`BT /F1 8 Tf 1 0 0 1 ${margin} 36 Tm <${pdfEncode('Gerado no dispositivo. Não substitui extrato bancário.')}> Tj ET`,`BT /F1 8 Tf 1 0 0 1 ${(right-60).toFixed(2)} 36 Tm <${pdfEncode('Página '+(p+1)+' / '+pages.length)}> Tj ET`];pages[p]+='\n'+footerOps.join('\n')}};
+ newPage();
+ const s=sums(),cal=calendarModel();
+ txt('Período: '+monthName(selectedMonth),margin,y,12,true,colors.text);y+=18;
+ txt('Emitido em '+new Date().toLocaleString('pt-BR'),margin,y,8,false,colors.muted);y+=27;
+ title('Resumo do orçamento');
+ keyval('Saldo inicial',fmtSigned(s.cfg.opening));
+ keyval('Entradas do mês (realizadas e previstas)',money(s.income));
+ keyval('Saídas do mês (realizadas e previstas)',money(s.expense));
+ keyval('Saldo projetado',fmtSigned(s.projected));
+ keyval('Lazer ainda a separar',money(s.leisurePending));
+ keyval('Reserva ainda a separar',money(s.savingsPending));
+ keyval('Margem positiva mínima',money(s.cfg.cushion));
+ rectangle(margin,y-14,contentW,27,colors.paper);
+ txt('Disponível após as metas',margin+7,y+3,9,true);rightText(fmtSigned(s.free),right-7,y+3,10,true,s.free>=0?colors.teal:colors.red);y+=41;
+ title('Plano de equilíbrio e fluxo de caixa');
+ keyval('Valor adicional necessário para metas',money(s.goalGap));
+ keyval('Dias disponíveis para renda extra',String(s.days));
+ keyval('Renda extra por dia (estimativa matemática)',s.days?money(s.daily):'Sem dias disponíveis');
+ keyval('Menor saldo ao longo do mês',fmtSigned(cal.low));
+ if(cal.firstNegative){txt('Atenção: risco de saldo negativo a partir de '+dateDisplay(cal.firstNegative),margin+3,y,8,true,colors.red);y+=23}
+ else {txt('Sem saldo negativo nas datas registradas.',margin+3,y,8,false,colors.teal);y+=22}
+ title('Lançamentos do mês');
+ const list=[...s.tx].sort((a,b)=>a.date.localeCompare(b.date)||a.title.localeCompare(b.title));
+ const columns=[{label:'Data',x:margin+3,w:57},{label:'Tipo',x:margin+62,w:45},{label:'Descrição',x:margin+113,w:118},{label:'Categoria',x:margin+234,w:84},{label:'Valor (R$)',x:margin+326,w:75},{label:'Situação',x:margin+415,w:67},{label:'Fixo',x:margin+487,w:30}];
+ function tableHeader(){rectangle(margin,y-13,contentW,22,colors.paper);for(const col of columns)txt(col.label,col.x,y,7.1,true,colors.navy);y+=17;line(y,margin,right);y+=7}
+ tableHeader();
+ if(!list.length){txt('Nenhum lançamento cadastrado para este mês.',margin+5,y+8,9,false,colors.muted);y+=22}
+ for(const t of list){
+   const fields=[dateDisplay(t.date),t.type==='income'?'Entrada':'Saída',t.title,t.category,fmtSigned(t.type==='income'?t.amount:-t.amount),t.status==='done'?'Realizado':'Previsto',t.fixed?'Sim':'Não'];
+   const descriptionLines=pdfWrap(t.title,columns[2].w-13,7.5);
+   const rowHeight=Math.max(24,descriptionLines.length*10+10);
+   if(ensure(rowHeight+6))tableHeader();
+   for(let i=0;i<columns.length;i++){
+     const col=columns[i];if(i===2){for(let k=0;k<descriptionLines.length;k++)txt(descriptionLines[k],col.x,y+4+k*10,7.5);continue;}
+     const value=pdfFit(fields[i],col.w-10,7.1);
+     txt(value,col.x,y+4,7.1,false,i===4?(t.type==='income'?colors.teal:colors.red):colors.text);
+   }
+   y+=rowHeight;line(y,margin,right);y+=4;
+ }
+ ensure(44);y+=7;
+ txt('Valores previstos são projeções e não dinheiro recebido ou pago.',margin,y,8,false,colors.muted);y+=12;
+ txt('PDF e CSV são relatórios. Para recuperar os dados, use o backup JSON.',margin,y,8,false,colors.muted);
+ pages.push(ops.join('\n'));footer();
+ const obj=[];const add=(s)=>{obj.push(s);return obj.length};
+ const catalog=add(''),pagesId=add(''),fontRegular=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'),fontBold=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+ const refs=[];
+ for(const stream of pages){const pageId=add(''),contentId=add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);refs.push(pageId);obj[pageId-1]=`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${A4_W} ${A4_H}] /Resources << /Font << /F1 ${fontRegular} 0 R /F2 ${fontBold} 0 R >> >> /Contents ${contentId} 0 R >>`}
+ obj[catalog-1]=`<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
+ obj[pagesId-1]=`<< /Type /Pages /Count ${refs.length} /Kids [${refs.map(id=>id+' 0 R').join(' ')}] >>`;
+ let output='%PDF-1.4\n';const offsets=[0];
+ for(let i=0;i<obj.length;i++){offsets.push(output.length);output+=`${i+1} 0 obj\n${obj[i]}\nendobj\n`}
+ const xrefOffset=output.length;
+ output+=`xref\n0 ${obj.length+1}\n0000000000 65535 f \n`;
+ for(let i=1;i<offsets.length;i++)output+=`${String(offsets[i]).padStart(10,'0')} 00000 n \n`;
+ output+=`trailer\n<< /Size ${obj.length+1} /Root ${catalog} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+ return new Blob([output],{type:'application/pdf'});
+}
+function exportPdf(){
+ try{
+  if(loadProblemMessage)throw Error('Os dados locais precisam de recuperação. Restaure o backup antes de exportar.');
+  const blob=makePdfReport();
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`Smart_Familia_relatorio_${selectedMonth}.pdf`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
+  toast('PDF gerado para o mês selecionado. O backup JSON permanece separado.');
+ }catch(err){alert('Não foi possível gerar o PDF: '+err.message)}
+}
+
 function carryPrevious(){const [y,m]=selectedMonth.split('-').map(Number),d=new Date(y,m-2,1),prev=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
  if(prev>=currentMonth()){alert('Transporte indisponível: o mês anterior ainda não terminou. Aguarde seu fechamento para não antecipar dinheiro.');return}
  if(!data.months[prev]){alert('O mês anterior não possui saldo inicial configurado. Registre-o antes de transportar o saldo.');return}
@@ -149,7 +267,7 @@ function carryPrevious(){const [y,m]=selectedMonth.split('-').map(Number),d=new 
  if(!confirm(`Levar o saldo de encerramento de ${monthName(prev)} (${fmtSigned(closing)}) para o saldo inicial de ${monthName(selectedMonth)}? Isso substituirá o valor atual de ${fmtSigned(monthData().opening)}. Não registre o mesmo saldo como receita.`))return;
  monthData().opening=closing;save();render();toast('Saldo transportado. Confira se corresponde ao dinheiro realmente disponível.');}
 function settingsView(s){const c=s.cfg;return `<div class="grid settingsgrid"><section class="card"><h3>Metas de ${monthName(selectedMonth)}</h3><p>Escolha números que protejam as contas e permitam desfrutar bons momentos em família.</p><form id="settingsForm"><div class="formgrid"><div class="field"><label for="opening">Saldo inicial do mês (R$)</label><input id="opening" name="opening" type="number" min="-100000000000" step="0.01" inputmode="decimal" value="${c.opening}" required></div><div class="field"><label for="leisure">Verba de lazer do mês (R$)</label><input id="leisure" name="leisure" type="number" min="0" step="0.01" inputmode="decimal" value="${c.leisure}" required></div><div class="field"><label for="savings">Quanto deseja guardar (R$)</label><input id="savings" name="savings" type="number" min="0" step="0.01" inputmode="decimal" value="${c.savings}" required></div><div class="field"><label for="cushion">Saldo final mínimo positivo (R$)</label><input id="cushion" name="cushion" type="number" min="0.01" step="0.01" inputmode="decimal" value="${c.cushion}" required></div><div class="field span2"><label for="workdays">Dias disponíveis para renda extra</label><select id="workdays" name="workdays"><option value="sunfri" ${c.workdays==='sunfri'?'selected':''}>Domingo a sexta (sábado livre)</option><option value="weekdays" ${c.workdays==='weekdays'?'selected':''}>Segunda a sexta</option><option value="all" ${c.workdays==='all'?'selected':''}>Todos os dias</option></select></div></div><div class="formactions"><button type="submit" class="cta">Salvar metas</button></div></form><div class="notice mt18">Saldo inicial é o dinheiro disponível no começo deste mês, não a soma de suas receitas. Digite-o apenas uma vez para evitar contagem dupla. Metas de guardar e lazer não retiram dinheiro da conta automaticamente. Transferiu a reserva para outra conta? Registre uma única saída na categoria “Reserva”, para abater o valor que ainda falta guardar.</div></section>
-<section class="card"><h3>Seus dados e segurança</h3><p>Os dados ficam somente neste navegador e dispositivo. Faça backups frequentes.</p><div style="display:grid;gap:10px"><button class="cta" id="exportBackup">Baixar backup JSON</button><button class="cta outline" id="importBackup">Restaurar backup JSON</button><button class="cta outline" id="exportCsv">Baixar relatório CSV do mês</button><button class="cta secondary" id="carryPrevious">Trazer saldo do mês anterior</button><button class="cta secondary" id="loadDemo">Experimentar mês de exemplo</button><button class="cta danger" id="clearMonth">Apagar somente este mês</button></div><div class="notice mt18"><strong>Importante:</strong> ao limpar os dados do navegador, desinstalar ou trocar de aparelho, lançamentos podem desaparecer. O backup permite restaurá-los em outro navegador ou dispositivo. A restauração substitui todos os dados atuais.</div><div class="notice mt18">Importante: transporte do saldo anterior é manual, requer mês encerrado e sem lançamentos pendentes. O saldo não inclui metas de reserva que não foram efetivamente retiradas. Você deve confirmar o valor com seu extrato.<br>Modo: ${memoryOnly?'<strong style="color:#aa3d45">armazenamento indisponível; faça backup agora.</strong>':'<strong>armazenamento local ativo.</strong>'}</div></section></div>`}
+<section class="card"><h3>Seus dados e segurança</h3><p>Os dados ficam somente neste navegador e dispositivo. Faça backups frequentes.</p><div style="display:grid;gap:10px"><button class="cta" id="exportBackup">Baixar backup JSON</button><button class="cta outline" id="importBackup">Restaurar backup JSON</button><button class="cta outline" id="exportCsv">Baixar relatório CSV do mês</button><button class="cta outline" id="exportPdf">Baixar relatório PDF do mês</button><button class="cta secondary" id="carryPrevious">Trazer saldo do mês anterior</button><button class="cta secondary" id="loadDemo">Experimentar mês de exemplo</button><button class="cta danger" id="clearMonth">Apagar somente este mês</button></div><div class="notice mt18"><strong>Importante:</strong> ao limpar os dados do navegador, desinstalar ou trocar de aparelho, lançamentos podem desaparecer. O backup permite restaurá-los em outro navegador ou dispositivo. A restauração substitui todos os dados atuais.</div><div class="notice mt18">Importante: transporte do saldo anterior é manual, requer mês encerrado e sem lançamentos pendentes. O saldo não inclui metas de reserva que não foram efetivamente retiradas. Você deve confirmar o valor com seu extrato.<br>Modo: ${memoryOnly?'<strong style="color:#aa3d45">armazenamento indisponível; faça backup agora.</strong>':'<strong>armazenamento local ativo.</strong>'}</div></section></div>`}
 function render(){document.getElementById('monthLabel').textContent=monthName(selectedMonth);if(loadProblemMessage){document.getElementById('view').innerHTML='<section class="card pad" role="alert"><h2>Dados locais precisam de recuperação</h2><p>'+esc(loadProblemMessage)+'</p><p>Para preservar a chance de recuperar seus lançamentos, nenhum novo dado será gravado sobre o arquivo existente. Use um backup JSON válido.</p><button class="cta" id="importBackup">Restaurar backup JSON</button></section>';return;} document.querySelectorAll('.tab').forEach(b=>{const yes=b.dataset.tab===activeTab;b.classList.toggle('active',yes);b.setAttribute('aria-current',yes?'page':'false')});const s=sums();document.getElementById('view').innerHTML=(memoryOnly?'<div class="alert bad" role="alert">Atenção: alterações nesta sessão podem não persistir. Faça um backup JSON e verifique o armazenamento antes de lançar dados reais.</div>':'')+({inicio:overview,lancamentos:transactionsView,orcamentos:budgetsView,fluxo:cashFlowView,plano:planView,ajustes:settingsView})[activeTab](s);if(activeTab==='lancamentos'){const e=editingId?data.transactions.find(t=>t.id===editingId):null;fillCategory(e?.category||null)}}
 function shiftMonth(n){const [y,m]=selectedMonth.split('-').map(Number),d=new Date(y,m-1+n,1);selectedMonth=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;scenarioCut=0;scenarioExtra=0;editingId=null;render()}
 function validateMoney(input,positive=false){const v=Number(input);if(!Number.isFinite(v)||v<0||(positive&&v<=0)||v>1e11)throw Error('Informe um valor válido em reais.');const rounded=clampMoney(v);if(positive&&rounded<0.01)throw Error('O menor valor de lançamento é R$ 0,01.');return rounded}
@@ -162,7 +280,7 @@ function demoConfirm(){if(!confirm(`Adicionar dados fictícios a ${monthName(sel
 function clearMonth(){if(!confirm(`Apagar os lançamentos E metas de ${monthName(selectedMonth)}? Esta ação não pode ser desfeita sem backup.`))return;data.transactions=data.transactions.filter(t=>t.date.slice(0,7)!==selectedMonth);delete data.months[selectedMonth];scenarioCut=0;scenarioExtra=0;save();goto('inicio');toast('Dados deste mês apagados.')}
 document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goto(b.dataset.tab)});
 document.getElementById('prevMonth').addEventListener('click',()=>shiftMonth(-1));document.getElementById('nextMonth').addEventListener('click',()=>shiftMonth(1));document.getElementById('backupTop').addEventListener('click',exportBackup);document.getElementById('settingsTop').addEventListener('click',()=>goto('ajustes'));
-document.getElementById('view').addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a){handleAction(a.dataset.action);return}const f=e.target.closest('[data-filter]');if(f){filter=f.dataset.filter;render();return}const edit=e.target.closest('[data-edit]');if(edit){editingId=edit.dataset.edit;render();document.getElementById('txForm')?.scrollIntoView({behavior:'smooth',block:'start'});return}const del=e.target.closest('[data-delete]');if(del){const t=data.transactions.find(x=>x.id===del.dataset.delete);if(t&&confirm(`Excluir “${t.title}” de ${money(t.amount)}?`)){data.transactions=data.transactions.filter(x=>x.id!==t.id);if(editingId===t.id)editingId=null;save();render();toast('Lançamento removido.')}return}const toggle=e.target.closest('[data-toggle]');if(toggle){const t=data.transactions.find(x=>x.id===toggle.dataset.toggle);if(t){t.status=t.status==='done'?'expected':'done';save();render();toast('Situação atualizada.')}return}if(e.target.id==='cancelEdit'){editingId=null;render();return}if(e.target.id==='saveBudgets'){try{const c=monthData();const next={...c.budgets};document.querySelectorAll('[data-budget]').forEach(input=>next[input.dataset.budget]=validateMoney(input.value||0));c.budgets=next;save();render();toast('Limites mensais salvos.')}catch(err){alert(err.message)}return}if(e.target.id==='resetScenario'){scenarioCut=0;scenarioExtra=0;render();toast('Simulação zerada.');return}if(e.target.id==='exportBackup'){exportBackup();return}if(e.target.id==='exportCsv'){exportCsv();return}if(e.target.id==='carryPrevious'){carryPrevious();return}if(e.target.id==='importBackup'){document.getElementById('importFile').click();return}if(e.target.id==='loadDemo'){demoConfirm();return}if(e.target.id==='clearMonth'){clearMonth();return}});
+document.getElementById('view').addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a){handleAction(a.dataset.action);return}const f=e.target.closest('[data-filter]');if(f){filter=f.dataset.filter;render();return}const edit=e.target.closest('[data-edit]');if(edit){editingId=edit.dataset.edit;render();document.getElementById('txForm')?.scrollIntoView({behavior:'smooth',block:'start'});return}const del=e.target.closest('[data-delete]');if(del){const t=data.transactions.find(x=>x.id===del.dataset.delete);if(t&&confirm(`Excluir “${t.title}” de ${money(t.amount)}?`)){data.transactions=data.transactions.filter(x=>x.id!==t.id);if(editingId===t.id)editingId=null;save();render();toast('Lançamento removido.')}return}const toggle=e.target.closest('[data-toggle]');if(toggle){const t=data.transactions.find(x=>x.id===toggle.dataset.toggle);if(t){t.status=t.status==='done'?'expected':'done';save();render();toast('Situação atualizada.')}return}if(e.target.id==='cancelEdit'){editingId=null;render();return}if(e.target.id==='saveBudgets'){try{const c=monthData();const next={...c.budgets};document.querySelectorAll('[data-budget]').forEach(input=>next[input.dataset.budget]=validateMoney(input.value||0));c.budgets=next;save();render();toast('Limites mensais salvos.')}catch(err){alert(err.message)}return}if(e.target.id==='resetScenario'){scenarioCut=0;scenarioExtra=0;render();toast('Simulação zerada.');return}if(e.target.id==='exportBackup'){exportBackup();return}if(e.target.id==='exportCsv'){exportCsv();return}if(e.target.id==='exportPdf'){exportPdf();return}if(e.target.id==='carryPrevious'){carryPrevious();return}if(e.target.id==='importBackup'){document.getElementById('importFile').click();return}if(e.target.id==='loadDemo'){demoConfirm();return}if(e.target.id==='clearMonth'){clearMonth();return}});
 document.getElementById('view').addEventListener('change',e=>{if(e.target.id==='type')fillCategory('Outros');if(['scenarioCut','scenarioExtra'].includes(e.target.id)){scenarioCut=clampMoney(document.getElementById('scenarioCut')?.value);scenarioExtra=clampMoney(document.getElementById('scenarioExtra')?.value);render()}});
 document.getElementById('view').addEventListener('submit',e=>{e.preventDefault();if(e.target.id==='txForm'){const form=e.target;try{const fd=new FormData(form),type=fd.get('type'),amount=validateMoney(fd.get('amount'),true),title=String(fd.get('title')||'').trim(),date=String(fd.get('date')||''),category=fd.get('category');if(!title)throw Error('Informe uma descrição.');if(!isoValid(date))throw Error('Informe uma data válida.');if(date.slice(0,7)!==selectedMonth)throw Error(`A data deve estar em ${monthName(selectedMonth)}. Mude o mês no cabeçalho para registrar outra data.`);if(!['income','expense'].includes(type)||(type==='income'?incomeCategories:expenseCategories).indexOf(category)<0)throw Error('Categoria inválida.');const t={id:editingId||uid(),type,title:title.slice(0,120),amount,date,category,status:fd.get('status')==='expected'?'expected':'done',fixed:fd.get('fixed')==='on',sourceId:null};if(editingId){const ix=data.transactions.findIndex(x=>x.id===editingId);if(ix<0)throw Error('Lançamento não encontrado.');t.sourceId=data.transactions[ix].sourceId;data.transactions[ix]=t}else data.transactions.push(t);editingId=null;save();render();toast('Lançamento salvo.')}catch(err){alert(err.message)}return}if(e.target.id==='settingsForm'){try{const f=new FormData(e.target),c=monthData();const next={opening:validateSigned(f.get('opening')),leisure:validateMoney(f.get('leisure')),savings:validateMoney(f.get('savings')),cushion:validateMoney(f.get('cushion'),true),workdays:['sunfri','weekdays','all'].includes(f.get('workdays'))?f.get('workdays'):'sunfri'};Object.assign(c,next);save();render();toast('Metas mensais salvas.')}catch(err){alert(err.message)}}});
 document.getElementById('importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>5e6)throw Error('O arquivo excede o tamanho permitido de 5 MB.');const raw=JSON.parse(await f.text());const imported=normalize(raw);if(!confirm(`Restaurar backup? Isso substituirá todos os lançamentos e metas deste dispositivo por ${imported.transactions.length} lançamento(s) do arquivo.`))return;const previous=data;data=imported;if(!save(true)){data=previous;throw Error('Backup válido, mas o navegador não conseguiu gravar os dados. O arquivo anterior permanece no armazenamento.');}loadProblemMessage='';scenarioCut=0;scenarioExtra=0;editingId=null;render();toast('Backup restaurado com sucesso.')}catch(err){alert('Não foi possível restaurar: '+err.message)}finally{e.target.value=''}});
